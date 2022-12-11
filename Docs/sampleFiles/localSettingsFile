@@ -1,0 +1,10 @@
+[localFileSettings]
+description = UseOnlyForEvaluationPurposes
+AWSMFASecret = 1658177010
+
+
+[AWS]
+aws_mfa_device = arn:aws:iam::1234567890123:mfa/username
+region = eu-west-1
+aws_access_key_id = XXXXXXXXXXXXXXXXXXXX
+aws_secret_access_key = YYYYYYYYYYYYYYYYYYYYYYYYYYYYY
