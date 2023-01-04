@@ -30,3 +30,11 @@ func (ini IniLogic) Get1PasswordSettings() (string, string) {
 func (ini IniLogic) Set1PasswordSettings(domain, entity string) {
 	creds.Set1PasswordSettings(ini.AWSFolderLocation, domain, entity)
 }
+
+func (ini IniLogic) GetLocalSettings() (string, string, string, string, string, string, error) {
+	return creds.GetLocalSettings(ini.AWSFolderLocation)
+}
+
+func (ini IniLogic) SetLocalSettings(MFADevice, MFASeed, access_key, secret_access_key, alias, region string) {
+	creds.SetLocalSettings(ini.AWSFolderLocation, MFADevice, MFASeed, access_key, secret_access_key, alias)
+}

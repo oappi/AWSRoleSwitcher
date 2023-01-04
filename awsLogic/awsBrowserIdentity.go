@@ -11,14 +11,19 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/oappi/awsroler/interfaces"
 	"github.com/oappi/awsroler/sharedStructs"
 )
 
-func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionInfo) {
-	loginURLPrefix, destination := GenerateLoginURL("eu-west-1", "")
+func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionInfo, SettingsInterface interfaces.SettingsInterface) error {
+	region, errRegion := SettingsInterface.GetRegion()
+	if errRegion != nil {
+		return errRegion
+	}
+	loginURLPrefix, destination := GenerateLoginURL(region, "")
 	req, err := http.NewRequest("GET", loginURLPrefix, nil)
 	if err != nil {
-		return
+		return err
 	}
 
 	jsonBytes, err := json.Marshal(map[string]string{
@@ -33,13 +38,13 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return
+		return err
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return
+		return err
 	}
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Response body was %s", body)
@@ -48,7 +53,7 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 	var respParsed map[string]string
 	err = json.Unmarshal([]byte(body), &respParsed)
 	if err != nil {
-		return
+		return err
 	}
 
 	signinToken, ok := respParsed["SigninToken"]
@@ -61,13 +66,27 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 	switch runtime.GOOS {
 	case "linux":
 		err = exec.Command("xdg-open", loginURL).Start()
+		if err != nil {
+			return err
+		}
 	case "windows":
 		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", loginURL).Start()
+		if err != nil {
+			return err
+		}
 	case "darwin":
 		err = exec.Command("open", loginURL).Start()
+		if err != nil {
+			return err
+		}
 	default:
 		err = fmt.Errorf("unsupported platform")
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 // shout out to https://github.com/99designs/aws-vault/blob/master/cli/login.go

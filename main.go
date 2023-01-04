@@ -2,8 +2,11 @@
 package main
 
 import (
+	"context"
 	"runtime"
+	"strconv"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -24,7 +27,7 @@ var lock = &sync.Mutex{}
 var topWindow fyne.Window
 var localWriter = interfaces.IniLogic{AWSFolderLocation: creds.GetAWSFolderStripError()}
 var accountlistlocation = ""
-var region = ""
+var gregion = ""
 var accountsList = []string{"Apply Settings first"}
 var gOptionSelection *widget.SelectEntry
 var SettingsInterface interfaces.SettingsInterface
@@ -68,10 +71,6 @@ func main() {
 		go showLocalSettings(a)
 	})
 
-	connectlocalSettingsMFA := fyne.NewMenuItem("Show local MFA", func() {
-		//TODO go show1PSettings(a)
-	})
-
 	advancedMenu := fyne.NewMenu("Advanced",
 		fyne.NewMenuItem("Rotate Accesskey", func() {
 			go showKeyRotation(a)
@@ -88,7 +87,7 @@ func main() {
 	connectMenu := fyne.NewMenu("Connect", connect1passwordItem)
 	file := fyne.NewMenu("File", settingsItem)
 	advancedMenu.Items = append(advancedMenu.Items, rotateconsolePassword)
-	connectMenu.Items = append(connectMenu.Items, fyne.NewMenuItemSeparator(), connectlocalSettings, connectlocalSettingsMFA)
+	connectMenu.Items = append(connectMenu.Items, fyne.NewMenuItemSeparator(), connectlocalSettings)
 	//file.Items = append(file.Items, fyne.NewMenuItemSeparator(), guiSettingsItem)
 
 	mainMenu := fyne.NewMainMenu(
@@ -114,7 +113,7 @@ func main() {
 		}
 	})
 	openBrowserButton := widget.NewButton("Open in Browser", func() {
-		idp.LoginBrowser(accountName.Text, awsSession)
+		idp.LoginBrowser(accountName.Text, awsSession, SettingsInterface)
 	})
 
 	reconnectButton.Importance = 0
@@ -170,14 +169,17 @@ func main() {
 }
 
 func showLocalSettings(a fyne.App) {
-	// try to load settings if possible
+	win := a.NewWindow("Local Connect Settings")
 	MFASeedLabel := widget.NewLabel("MFA seed")
 	MFASeedText := widget.NewEntry()
 	regionLabel := widget.NewLabel("Region")
 	regionListText := widget.NewEntry()
-	regionListText.SetPlaceHolder("eu-west-1")
 	MFADeviceLabel := widget.NewLabel("MFA Device")
 	MFADeviceText := widget.NewEntry()
+	MFACodeButtonLabel := widget.NewLabel("MFA code")
+	MFACodeButton := widget.NewButton("Show MFA code", func() {
+		go showLocalMFA(a, OverRideSavedIfUserGivesInput(MFASeedText.Text, ""))
+	})
 	AccessKeyLabel := widget.NewLabel("AccessKey")
 	AccessKeyText := widget.NewPasswordEntry()
 	SecretAccessKeyLabel := widget.NewLabel("SecretAccessKey")
@@ -186,36 +188,46 @@ func showLocalSettings(a fyne.App) {
 	aliasText := widget.NewEntry()
 	accountListLocation := creds.GetAWSFolderStripError() + "accountlist"
 
-	labels := container.NewGridWithColumns(1, MFASeedLabel, MFADeviceLabel, regionLabel, AccessKeyLabel, SecretAccessKeyLabel, aliasLabel)
-	textFields := container.NewGridWithColumns(1, MFASeedText, MFADeviceText, regionListText, AccessKeyText, SecretAccessKeyText, aliasText)
+	mfaDevice, mfaSeed, accesskey, secretaccesskey, alias, region, fetcherror := localWriter.GetLocalSettings()
+	if fetcherror != nil {
+		MFADeviceText.SetPlaceHolder(mfaDevice)
+		MFASeedText.SetPlaceHolder(mfaSeed)
+		AccessKeyText.SetPlaceHolder(accesskey)
+		SecretAccessKeyText.SetPlaceHolder(secretaccesskey)
+		aliasText.SetPlaceHolder(alias)
+	}
+	labels := container.NewGridWithColumns(1, MFASeedLabel, MFADeviceLabel, MFACodeButtonLabel, regionLabel, AccessKeyLabel, SecretAccessKeyLabel, aliasLabel)
+	textFields := container.NewGridWithColumns(1, MFASeedText, MFADeviceText, MFACodeButton, regionListText, AccessKeyText, SecretAccessKeyText, aliasText)
 	settingscontainer := container.NewGridWithColumns(2, labels, textFields)
 
-	applySettingsButton := widget.NewButton("Apply", func() {
-		var savedEntity = ""
-		MFASeedOption := OverRideSavedIfUserGivesInput(MFASeedText.Text, savedEntity)
-		MFADeviceOption := OverRideSavedIfUserGivesInput(MFADeviceText.Text, savedEntity)
-		RegionOption := OverRideSavedIfUserGivesInput(regionListText.Text, savedEntity)
-		AccessKeyOption := OverRideSavedIfUserGivesInput(AccessKeyText.Text, savedEntity)
-		SecretAccessKeyOption := OverRideSavedIfUserGivesInput(SecretAccessKeyText.Text, savedEntity)
-		UserAliasOption := OverRideSavedIfUserGivesInput(aliasText.Text, savedEntity)
+	applySettingsButton := widget.NewButton("Connect", func() {
+		MFASeedOption := OverRideSavedIfUserGivesInput(MFASeedText.Text, mfaSeed)
+		MFADeviceOption := OverRideSavedIfUserGivesInput(MFADeviceText.Text, mfaDevice)
+		RegionOption := OverRideSavedIfUserGivesInput(regionListText.Text, region)
+		AccessKeyOption := OverRideSavedIfUserGivesInput(AccessKeyText.Text, accesskey)
+		SecretAccessKeyOption := OverRideSavedIfUserGivesInput(SecretAccessKeyText.Text, secretaccesskey)
+		UserAliasOption := OverRideSavedIfUserGivesInput(aliasText.Text, alias)
 		AccountListLocationOption := OverRideSavedIfUserGivesInput(accountListLocation, accountListLocation)
 		SettingsInterface = interfaces.LocalSettings{Lock: lock, MFASeed: MFASeedOption, MFADevice: MFADeviceOption, Region: RegionOption, AccessKey: AccessKeyOption, SecretAccessKey: SecretAccessKeyOption, UserAlias: UserAliasOption, AccountListLocation: AccountListLocationOption, AWSFolderLocation: creds.GetAWSFolderStripError(), LocalWriter: localWriter}
 		err := updateSettings(SettingsInterface)
 		if err != nil {
 			popError(a, err)
+
+		} else {
+			localWriter.SetLocalSettings(MFADeviceOption, MFASeedOption, AccessKeyOption, SecretAccessKeyOption, UserAliasOption, RegionOption)
+			win.Close()
 		}
 	})
 
 	settingsplit := container.NewVSplit(settingscontainer, applySettingsButton)
 	settingsplit.Offset = 0.9
-	win := a.NewWindow("Settings")
 	win.SetContent(settingsplit)
 	win.Show()
 	win.Close()
 }
 
 func show1PSettings(a fyne.App) {
-	win := a.NewWindow("Settings")
+	win := a.NewWindow("1Password Settings")
 	savedDomain, savedEntity := localWriter.Get1PasswordSettings()
 	println("domain: " + savedDomain)
 	domainLabel := widget.NewLabel("1Password domain")
@@ -275,6 +287,65 @@ func showAuthor(a fyne.App) {
 	win.Resize(fyne.NewSize(200, 200))
 	win.Show()
 	win.Close()
+}
+
+func showLocalMFA(a fyne.App, MFAsecret string) {
+	print(MFAsecret)
+	win := a.NewWindow("MFA")
+	MFACode := widget.NewLabel("")
+	Timer := widget.NewLabel("Timer")
+	TimerLabel := widget.NewLabel("Time left")
+	MFACodeLabel := widget.NewLabel("MFA")
+	copyButton := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+		win.Clipboard().SetContent(MFACode.Text)
+	})
+	Empty := widget.NewLabel("")
+	mfaContainer := container.NewGridWithColumns(1, MFACode)
+	timercontainer := container.NewGridWithColumns(1, Timer)
+
+	labels := container.NewGridWithColumns(1, container.NewCenter(MFACodeLabel), container.NewCenter(TimerLabel))
+	infos := container.NewGridWithColumns(1, container.NewCenter(mfaContainer), container.NewCenter(timercontainer))
+	actions := container.NewGridWithColumns(1, container.NewCenter(copyButton), Empty, Empty)
+	settingscontainer := container.NewGridWithColumns(3, labels, infos, actions)
+
+	win.SetContent(settingscontainer)
+	win.Show()
+	win.Close()
+
+	forever := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func(ctx context.Context) {
+		for {
+			select {
+			case <-ctx.Done(): // if cancel() execute
+				forever <- struct{}{}
+				return
+			default:
+				var unixtime = time.Now().Unix()
+				var timeLeft = 30 - unixtime%30
+				var mfaTimePast = 30 - timeLeft
+				var unixtimeOfGettingMFA = unixtime - mfaTimePast //we only fetch every 30s
+				var stringTimeLeft = strconv.FormatInt(timeLeft, 10)
+				Timer.SetText(stringTimeLeft)
+				if timeLeft == 30 || MFACode.Text == "" {
+					otp, error := creds.GetOTP(MFAsecret, unixtimeOfGettingMFA/30)
+					if error != nil {
+						MFACode.SetText("incorrect mfa secret")
+					} else {
+						MFACode.SetText(otp)
+					}
+				}
+			}
+			time.Sleep(500 * time.Millisecond)
+		}
+	}(ctx)
+
+	<-forever
+
+	win.SetOnClosed(func() {
+		cancel()
+	})
 }
 
 func showKeyRotation(a fyne.App) {

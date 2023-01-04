@@ -4,13 +4,32 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-func GetLocalSettings(AWSFolderlocation string) (string, string, string, error) {
-	cfg, _ := ini.Load(AWSFolderlocation + "awsroleswitcher")
-	mfaSeed := cfg.Section("localSettings").Key("mfa-seed").String()
-	accesskey := cfg.Section("localSettings").Key("aws_access_key_id").String()
-	secretaccesskey := cfg.Section("localSettings").Key("aws_secret_access_key").String()
+func GetLocalSettings(AWSFolderlocation string) (string, string, string, string, string, string, error) {
+	cfg, err := ini.Load(AWSFolderlocation + "awsroleswitcher")
+	if err != nil {
+		return "", "", "", "", "", "", err
+	}
+	mfaDevice := cfg.Section("localSettings").Key("MFADevice").String()
+	mfaSeed := cfg.Section("localSettings").Key("MFASeed").String()
+	accesskey := cfg.Section("localSettings").Key("access_key").String()
+	secretaccesskey := cfg.Section("localSettings").Key("secret_access_key").String()
+	alias := cfg.Section("localSettings").Key("alias").String()
+	region := cfg.Section("localSettings").Key("Region").String()
 
-	return mfaSeed, accesskey, secretaccesskey, nil
+	return mfaDevice, mfaSeed, accesskey, secretaccesskey, alias, region, nil
+}
+
+func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_access_key, alias string) {
+	cfg, err := ini.Load(AWSFolderlocation + "awsroleswitcher")
+	if err != nil {
+		cfg = ini.Empty()
+	}
+	cfg.Section("localSettings").Key("MFADevice").SetValue(MFADevice)
+	cfg.Section("localSettings").Key("MFASeed").SetValue(MFASeed)
+	cfg.Section("localSettings").Key("access_key").SetValue(access_key)
+	cfg.Section("localSettings").Key("secret_access_key").SetValue(secret_access_key)
+	cfg.Section("localSettings").Key("alias").SetValue(alias)
+	cfg.SaveTo(AWSFolderlocation + "awsroleswitcher")
 }
 
 func Get1PasswordSettings(AWSFolderlocation string) (string, string) {

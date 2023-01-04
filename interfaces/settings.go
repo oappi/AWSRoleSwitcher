@@ -124,5 +124,5 @@ func (op Onepassword) GetMFADevice() string {
 
 func (local LocalSettings) GetMFADevice() string {
 
-	return local.GetMFADevice()
+	return local.MFADevice
 }

@@ -72,7 +72,7 @@ func filteredCustomListForSelect(filter *string, list []string) (resultList []st
 }
 
 func OverRideSavedIfUserGivesInput(userInput string, savedInput string) string {
-	if userInput == "" {
+	if userInput != "" {
 		return userInput
 	} else {
 		return savedInput
@@ -146,7 +146,7 @@ func connectAccount(STSConfig *sharedStructs.STSConfig, selectedAccountInfo stri
 	var splittedaccountinfo = strings.Split(selectedAccountInfo, "|")
 	var accountToConnect = splittedaccountinfo[1]
 	var accountRole = splittedaccountinfo[2]
-	FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, region, sessionTime)
+	FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, gregion, sessionTime)
 	writer.UpdateShortTermKeys(awsSession.Accesskey, awsSession.SecretAccessKey, awsSession.Token)
 	return nil
 }
