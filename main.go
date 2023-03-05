@@ -24,11 +24,10 @@ import (
 
 var awsSession sharedStructs.SessionInfo
 var lock = &sync.Mutex{}
-var topWindow fyne.Window
+
 var localWriter = interfaces.IniLogic{AWSFolderLocation: creds.GetAWSFolderStripError()}
-var accountlistlocation = ""
 var gregion = ""
-var accountsList = []string{"Apply Settings first"}
+var accountsList = []string{"Connect to crendetial service first"}
 var gOptionSelection *widget.SelectEntry
 var SettingsInterface interfaces.SettingsInterface
 var SettingsObject sharedStructs.FederationAccountSettingsObject
@@ -47,15 +46,12 @@ func main() {
 	a.SetIcon(theme.FyneLogo())
 	w := a.NewWindow("AWS Role Switcher")
 	w.Resize(fyne.NewSize(550, 480))
-	topWindow = w
+
 	_, err := creds.GetAWSFolder(runtime.GOOS)
 	if err != nil {
 		errorPopUp(a, "OS not Supported")
 	}
-	/*newItem := fyne.NewMenuItem("New", nil)
-	newItem.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("File", func() { fmt.Println("Menu New->File") }),
-	)*/
+
 	settingsItem := fyne.NewMenuItem("GUI Settings", func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
@@ -75,9 +71,6 @@ func main() {
 		fyne.NewMenuItem("Rotate Accesskey", func() {
 			go showKeyRotation(a)
 		}))
-	rotateconsolePassword := fyne.NewMenuItem("Rotate AWS console password", func() {
-		//TODO go show1PSettings(a)
-	})
 
 	helpMenu := fyne.NewMenu("Help",
 		fyne.NewMenuItem("Info", func() {
@@ -86,7 +79,6 @@ func main() {
 
 	connectMenu := fyne.NewMenu("Connect", connect1passwordItem)
 	file := fyne.NewMenu("File", settingsItem)
-	advancedMenu.Items = append(advancedMenu.Items, rotateconsolePassword)
 	connectMenu.Items = append(connectMenu.Items, fyne.NewMenuItemSeparator(), connectlocalSettings)
 	//file.Items = append(file.Items, fyne.NewMenuItemSeparator(), guiSettingsItem)
 
@@ -149,8 +141,6 @@ func main() {
 		_, match := filteredCustomListForSelect(&input, timerOptions)
 		if match {
 			selectedSessionTime = input
-			print("sessionset")
-			println(selectedSessionTime)
 		}
 	}
 	//openBrowserButton
@@ -196,8 +186,8 @@ func showLocalSettings(a fyne.App) {
 		SecretAccessKeyText.SetPlaceHolder(secretaccesskey)
 		aliasText.SetPlaceHolder(alias)
 	}
-	labels := container.NewGridWithColumns(1, MFASeedLabel, MFADeviceLabel, MFACodeButtonLabel, regionLabel, AccessKeyLabel, SecretAccessKeyLabel, aliasLabel)
-	textFields := container.NewGridWithColumns(1, MFASeedText, MFADeviceText, MFACodeButton, regionListText, AccessKeyText, SecretAccessKeyText, aliasText)
+	labels := container.NewGridWithColumns(1, MFASeedLabel, MFACodeButtonLabel, MFADeviceLabel, regionLabel, AccessKeyLabel, SecretAccessKeyLabel, aliasLabel)
+	textFields := container.NewGridWithColumns(1, MFASeedText, MFACodeButton, MFADeviceText, regionListText, AccessKeyText, SecretAccessKeyText, aliasText)
 	settingscontainer := container.NewGridWithColumns(2, labels, textFields)
 
 	applySettingsButton := widget.NewButton("Connect", func() {
@@ -229,7 +219,6 @@ func showLocalSettings(a fyne.App) {
 func show1PSettings(a fyne.App) {
 	win := a.NewWindow("1Password Settings")
 	savedDomain, savedEntity := localWriter.Get1PasswordSettings()
-	println("domain: " + savedDomain)
 	domainLabel := widget.NewLabel("1Password domain")
 	domainText := widget.NewEntry()
 	domainText.SetPlaceHolder(savedDomain)
@@ -290,7 +279,6 @@ func showAuthor(a fyne.App) {
 }
 
 func showLocalMFA(a fyne.App, MFAsecret string) {
-	print(MFAsecret)
 	win := a.NewWindow("MFA")
 	MFACode := widget.NewLabel("")
 	Timer := widget.NewLabel("Timer")
@@ -360,11 +348,13 @@ func showKeyRotation(a fyne.App) {
 	infocontainer := container.NewGridWithColumns(1, textField)
 
 	applySettingsButton := widget.NewButton("Rotate", func() {
-		err := keyrotation.RotateAccesskeys(SettingsInterface)
+		err, newAccesskey, newSecretAccesskey := keyrotation.RotateAccesskeys(SettingsInterface)
 		if err != nil {
 			var errormessage = err.Error()
 			go errorPopUp(a, errormessage)
 		}
+		SettingsObject.AccessKey = newAccesskey
+		SettingsObject.SecretAccessKey = newSecretAccesskey
 		win.Close()
 	})
 

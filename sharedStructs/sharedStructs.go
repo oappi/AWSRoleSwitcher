@@ -1,7 +1,7 @@
 package sharedStructs
 
 import (
-	"sync"
+	//	"sync"
 
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
@@ -16,18 +16,19 @@ type SessionInfo struct {
 	Token           string
 }
 
-type MFAInfo struct {
-	profilename   string
-	opdomain      string
-	opuuid        string
-	password      string
-	accountnumber string
-	switchrole    string
-	lock          *sync.Mutex
-	awsSession    SessionInfo
-	region        string
-}
-
+/*
+	type MFAInfo struct {
+		profilename   string
+		opdomain      string
+		opuuid        string
+		password      string
+		accountnumber string
+		switchrole    string
+		lock          *sync.Mutex
+		awsSession    SessionInfo
+		region        string
+	}
+*/
 func CredentialFileSplitter(r rune) bool {
 	return r == '[' || r == ']'
 }

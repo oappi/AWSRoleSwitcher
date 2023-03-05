@@ -78,14 +78,15 @@ func GetAlias(signInCommand string, entityName string) (string, error) {
 	return OpCMDlogic(signInCommand + settingsFetchCommand)
 }
 
-func GetAccounts(signInCommand string, entityName string) ([]string, error) {
-	var accountsFetchCommand = "op item get " + entityName + " --fields Accounts"
-	accountStringListRaw, err := OpCMDlogic(signInCommand + accountsFetchCommand)
+func GetFetchAccountCommand(entityName string) string {
+	return "op item get " + entityName + " --fields Accounts"
+}
 
+func GetAccounts(signInCommand string, fetchAccountCommand string) ([]string, error) {
+	accountStringListRaw, err := OpCMDlogic(signInCommand + fetchAccountCommand)
 	if err != nil {
 		return nil, err
 	}
-
 	accountsParsed, _ := OPAccountListParser(accountStringListRaw)
 	accountList, error := convert1PasswordAccountStringToList(accountsParsed)
 

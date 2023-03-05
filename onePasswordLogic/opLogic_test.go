@@ -52,8 +52,15 @@ func TestOpCMDlogic(t *testing.T) {
 	}
 }
 func TestGetAccounts(t *testing.T) {
-	scommand := SigninCommand(getCreds())
-	accounts, err := GetAccounts(scommand, getEntityName())
+	var simulatedAnswer1P string = ` "\"[simulatedAccount] 
+	aws_account_id = 111112222333
+	role_name = exampleRoleName
+
+	[simulatedAccount2] 
+	aws_account_id = 111112222334
+	role_name = exampleRoleName1\""
+	`
+	accounts, err := GetAccounts("echo", simulatedAnswer1P)
 
 	if len(accounts) == 0 {
 		t.Fail()

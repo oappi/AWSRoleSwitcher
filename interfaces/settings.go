@@ -103,10 +103,9 @@ func (local LocalSettings) GetRegion() (string, error) {
 }
 
 func (op Onepassword) GetAccounts() ([]string, error) {
-
 	signincmd := opLogic.SigninCommand(op.Password, op.OPDomain)
-	accountsRaw, err := opLogic.GetAccounts(signincmd, op.Uuid)
-
+	fetchCommand := opLogic.GetFetchAccountCommand(op.Uuid)
+	accountsRaw, err := opLogic.GetAccounts(signincmd, fetchCommand)
 	return accountsRaw, err
 }
 
@@ -123,6 +122,5 @@ func (op Onepassword) GetMFADevice() string {
 }
 
 func (local LocalSettings) GetMFADevice() string {
-
 	return local.MFADevice
 }
