@@ -348,7 +348,7 @@ func showKeyRotation(a fyne.App) {
 	infocontainer := container.NewGridWithColumns(1, textField)
 
 	applySettingsButton := widget.NewButton("Rotate", func() {
-		err, newAccesskey, newSecretAccesskey := keyrotation.RotateAccesskeys(SettingsInterface)
+		err, newAccesskey, newSecretAccesskey := keyrotation.RotateAccesskeys(SettingsInterface, SettingsObject)
 		if err != nil {
 			var errormessage = err.Error()
 			go errorPopUp(a, errormessage)

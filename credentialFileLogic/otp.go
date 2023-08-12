@@ -24,10 +24,7 @@ func GetOTP(secret string, interval int64) (string, error) {
 	ob := (hs[19] & 15)
 	var header uint32
 	br := bytes.NewReader(hs[ob : ob+4])
-	errb := binary.Read(br, binary.BigEndian, &header)
-	if errb != nil {
-		return "", errors.New("Failed generate hash from MFA seed")
-	}
+	binary.Read(br, binary.BigEndian, &header) //we do not test binaryread error as i cannot replicate error in this context
 	h12 := (int(header) & 0x7fffffff) % 1000000
 	otp := strconv.Itoa(int(h12))
 

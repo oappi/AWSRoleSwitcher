@@ -13,7 +13,7 @@ type SettingsInterface interface {
 	GetAlias() string
 	GetAccesskey() string
 	GetSecretAccessKey() string
-	GetRegion() (string, error) //primary region
+	GetRegion() (string, error)
 	GetAccounts() ([]string, error)
 	GetMFADevice() string
 	SetLongtermAccessKeys(string, string) error

@@ -130,7 +130,7 @@ func FetchAndSaveAccountCredentials(stsConfig *sharedStructs.STSConfig, accountT
 }
 
 func getStSConfig(SettingsObject sharedStructs.FederationAccountSettingsObject) (*sharedStructs.STSConfig, error) {
-	stsConfig, stsError := awsLogic.InitializeSTSConfig(SettingsObject)
+	stsConfig, stsError := awsLogic.CreateSTSSession(SettingsObject)
 	if stsError != nil {
 		return nil, stsError
 	} else {
