@@ -233,35 +233,36 @@ func show1PSettings(a fyne.App) {
 	settingscontainer := container.NewGridWithColumns(2, labels, textFields)
 
 	applySettingsButton := widget.NewButton("Apply", func() {
-		var OPEntity = ""
-		var OPDomain = ""
-		// here we use saved value if user does not overwrite it
-		if entityNameText.Text == "" {
-			OPEntity = savedEntity
-		} else {
-			OPEntity = entityNameText.Text
-		}
-		if domainText.Text == "" {
-			OPDomain = savedDomain
-		} else {
-			OPDomain = domainText.Text
-		}
-		SettingsInterface = interfaces.Onepassword{Lock: lock, Uuid: OPEntity, OPDomain: OPDomain, Password: passwordText.Text}
+		finalDomain := replaceEmptyInputWithSavedValue(savedDomain, domainText.Text)
+		finalEntity := replaceEmptyInputWithSavedValue(savedEntity, entityNameText.Text)
+		SettingsInterface = interfaces.Onepassword{Lock: lock, Uuid: finalEntity, OPDomain: finalDomain, Password: passwordText.Text}
 		err := updateSettings(SettingsInterface)
 		if err != nil {
 			popError(a, err)
 		} else {
-			localWriter.Set1PasswordSettings(domainText.Text, entityNameText.Text)
+			if finalDomain != savedDomain || finalEntity != savedEntity {
+				localWriter.Set1PasswordSettings(finalDomain, finalEntity)
+			}
 			win.Close()
 		}
 	})
-
 	settingsplit := container.NewVSplit(settingscontainer, applySettingsButton)
 
 	settingsplit.Offset = 0.9
 	win.SetContent(settingsplit)
 	win.Show()
 	win.Close()
+}
+
+func replaceEmptyInputWithSavedValue(saved string, input string) string {
+	outputString := ""
+	if len(input) > 0 {
+		outputString = input
+	} else {
+		outputString = saved
+	}
+	return outputString
+
 }
 
 func showAuthor(a fyne.App) {
