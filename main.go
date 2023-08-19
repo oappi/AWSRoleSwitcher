@@ -101,7 +101,10 @@ func main() {
 		if stsError != nil {
 			popError(a, stsError)
 		} else {
-			connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+			connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+			if connectError != nil {
+				popError(a, connectError)
+			}
 		}
 	})
 	openBrowserButton := widget.NewButton("Open in Browser", func() {
@@ -130,7 +133,10 @@ func main() {
 			} else {
 				accountName.SetText(accountSelectEntry.Text)
 				accountName.Alignment = fyne.TextAlignLeading
-				connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+				connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+				if connectError != nil {
+					popError(a, connectError)
+				}
 				accountName.Alignment = fyne.TextAlignCenter
 			}
 

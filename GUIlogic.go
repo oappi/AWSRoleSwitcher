@@ -146,7 +146,10 @@ func connectAccount(STSConfig *sharedStructs.STSConfig, selectedAccountInfo stri
 	var splittedaccountinfo = strings.Split(selectedAccountInfo, "|")
 	var accountToConnect = splittedaccountinfo[1]
 	var accountRole = splittedaccountinfo[2]
-	FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, gregion, sessionTime)
+	fetchError := FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, gregion, sessionTime)
+	if fetchError != nil {
+		return fetchError
+	}
 	writer.UpdateShortTermKeys(awsSession.Accesskey, awsSession.SecretAccessKey, awsSession.Token)
 	return nil
 }
