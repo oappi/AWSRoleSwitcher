@@ -1,6 +1,8 @@
 package credentialFileLogic
 
 import (
+	"os"
+
 	"gopkg.in/ini.v1"
 )
 
@@ -19,7 +21,19 @@ func GetLocalSettings(AWSFolderlocation string) (string, string, string, string,
 	return mfaDevice, mfaSeed, accesskey, secretaccesskey, alias, region, nil
 }
 
-func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_access_key, alias string) {
+func saveWithReducedPriviliges(fullFilePath string, cfg *ini.File) error {
+	err := cfg.SaveTo(fullFilePath)
+	if err != nil {
+		return err
+	}
+	cerr := os.Chmod(fullFilePath, 0600)
+	if cerr != nil {
+		return cerr
+	}
+	return nil
+}
+
+func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_access_key, alias string) error {
 	cfg, err := ini.Load(AWSFolderlocation + "awsroleswitcher")
 	if err != nil {
 		cfg = ini.Empty()
@@ -29,7 +43,7 @@ func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_
 	cfg.Section("localSettings").Key("access_key").SetValue(access_key)
 	cfg.Section("localSettings").Key("secret_access_key").SetValue(secret_access_key)
 	cfg.Section("localSettings").Key("alias").SetValue(alias)
-	cfg.SaveTo(AWSFolderlocation + "awsroleswitcher")
+	return saveWithReducedPriviliges(AWSFolderlocation+"awsroleswitcher", cfg)
 }
 
 func Get1PasswordSettings(AWSFolderlocation string) (string, string) {
@@ -42,14 +56,14 @@ func Get1PasswordSettings(AWSFolderlocation string) (string, string) {
 	return domain, entity
 }
 
-func Set1PasswordSettings(AWSFolderlocation, domain, entity string) {
+func Set1PasswordSettings(AWSFolderlocation, domain, entity string) error {
 	cfg, err := ini.Load(AWSFolderlocation + "awsroleswitcher")
 	if err != nil {
 		cfg = ini.Empty()
 	}
 	cfg.Section("1password").Key("domain").SetValue(domain)
 	cfg.Section("1password").Key("entity").SetValue(entity)
-	cfg.SaveTo(AWSFolderlocation + "awsroleswitcher")
+	return saveWithReducedPriviliges(AWSFolderlocation+"awsroleswitcher", cfg)
 }
 
 func UpdateShortTermAWSKeys(accesskey, secretaccesskey, token, AWSFolderlocation string) error {
@@ -61,8 +75,7 @@ func UpdateShortTermAWSKeys(accesskey, secretaccesskey, token, AWSFolderlocation
 	cfg.Section("default").Key("aws_secret_access_key").SetValue(secretaccesskey)
 	cfg.Section("default").Key("aws_session_token").SetValue(token)
 	println("Note, Saving to AWS credentials file")
-	cfg.SaveTo(AWSFolderlocation + "credentials")
-	return nil
+	return saveWithReducedPriviliges(AWSFolderlocation+"credentials", cfg)
 }
 
 func UpdateLongTermAWSKeys(accesskey, secretaccesskey, token, AWSFolderlocation string) error {
@@ -77,8 +90,7 @@ func UpdateLongTermAWSKeys(accesskey, secretaccesskey, token, AWSFolderlocation 
 		cfg.Section("localSettings").Key("aws_session_token").SetValue(secretaccesskey)
 	}
 	println("Note, Saving to AWS credentials file")
-	cfg.SaveTo(settingsFile)
-	return nil
+	return saveWithReducedPriviliges(settingsFile, cfg)
 }
 
 /*

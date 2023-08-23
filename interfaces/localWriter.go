@@ -19,8 +19,8 @@ func (ini IniLogic) UpdateShortTermKeys(accesskey, secretAccessKey, token string
 }
 
 func (ini IniLogic) UpdateLongTermKeys(accesskey, secretAccessKey, token string) error {
-	creds.UpdateLongTermAWSKeys(accesskey, secretAccessKey, token, ini.AWSFolderLocation)
-	return nil
+	return creds.UpdateLongTermAWSKeys(accesskey, secretAccessKey, token, ini.AWSFolderLocation)
+
 }
 
 func (ini IniLogic) Get1PasswordSettings() (string, string) {

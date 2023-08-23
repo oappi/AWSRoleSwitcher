@@ -10,6 +10,9 @@ import (
 )
 
 func RotateAccesskeys(settingsInterface interfaces.SettingsInterface, SettingsObject sharedStructs.FederationAccountSettingsObject) (error, string, string) {
+	if settingsInterface.AdvancedFeaturesEnabled() {
+		return errors.New("option is not enabled to your password service provider (such as locally stored passwords)"), "", ""
+	}
 	iamSession, err := awslogic.CreateIAMSession(SettingsObject)
 	if err != nil {
 		return err, "", ""
