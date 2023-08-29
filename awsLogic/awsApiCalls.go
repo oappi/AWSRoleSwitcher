@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	iam "github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/oappi/awsroler/sharedStructs"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func CreateSTSSession(settingsFile sharedStructs.FederationAccountSettingsObject) (*sharedStructs.STSConfig, error) {

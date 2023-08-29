@@ -1,4 +1,4 @@
-module github.com/oappi/awsroler
+module github.com/oappi/awsroleswitcher
 
 go 1.16
 

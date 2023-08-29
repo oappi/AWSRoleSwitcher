@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionInfo, SettingsInterface interfaces.SettingsInterface) error {

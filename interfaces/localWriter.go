@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	creds "github.com/oappi/awsroler/credentialFileLogic"
+	creds "github.com/oappi/awsroleswitcher/credentialFileLogic"
 )
 
 type LocalWriter interface {

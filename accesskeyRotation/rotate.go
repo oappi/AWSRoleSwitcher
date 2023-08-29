@@ -4,13 +4,13 @@ import (
 	"errors"
 
 	iam "github.com/aws/aws-sdk-go/service/iam"
-	awslogic "github.com/oappi/awsroler/awsLogic"
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	awslogic "github.com/oappi/awsroleswitcher/awsLogic"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func RotateAccesskeys(settingsInterface interfaces.SettingsInterface, SettingsObject sharedStructs.FederationAccountSettingsObject) (error, string, string) {
-	if settingsInterface.AdvancedFeaturesEnabled() {
+	if settingsInterface.AdvancedFeaturesEnabled() == false {
 		return errors.New("option is not enabled to your password service provider (such as locally stored passwords)"), "", ""
 	}
 	iamSession, err := awslogic.CreateIAMSession(SettingsObject)

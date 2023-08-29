@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	cred "github.com/oappi/awsroler/credentialFileLogic"
-	opLogic "github.com/oappi/awsroler/onePasswordLogic"
+	cred "github.com/oappi/awsroleswitcher/credentialFileLogic"
+	opLogic "github.com/oappi/awsroleswitcher/onePasswordLogic"
 )
 
 type SettingsInterface interface {

@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"strconv"
 	"sync"
@@ -14,12 +15,11 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-
-	keyrotation "github.com/oappi/awsroler/accesskeyRotation"
-	idp "github.com/oappi/awsroler/awsLogic"
-	creds "github.com/oappi/awsroler/credentialFileLogic"
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	keyrotation "github.com/oappi/awsroleswitcher/accesskeyRotation"
+	idp "github.com/oappi/awsroleswitcher/awsLogic"
+	creds "github.com/oappi/awsroleswitcher/credentialFileLogic"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 var awsSession sharedStructs.SessionInfo
@@ -32,6 +32,7 @@ var gOptionSelection *widget.SelectEntry
 var SettingsInterface interfaces.SettingsInterface
 var SettingsObject sharedStructs.FederationAccountSettingsObject
 var selectedSessionTime = "1 hour session"
+var placeholderAccountName = "not set"
 
 // sessionInfo
 /*
@@ -92,26 +93,11 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	accountName := widget.NewLabel("not set")
+	accountName := widget.NewLabel(placeholderAccountName)
 	accountName.TextStyle.Bold = true
 	accountName.TextStyle.Italic = true
 	accountName.Alignment = fyne.TextAlignLeading
-	reconnectButton := widget.NewButton("Reconnect", func() {
-		stsSettings, stsError := getStSConfig(SettingsObject)
-		if stsError != nil {
-			popError(a, stsError)
-		} else {
-			connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
-			if connectError != nil {
-				popError(a, connectError)
-			}
-		}
-	})
-	openBrowserButton := widget.NewButton("Open in Browser", func() {
-		idp.LoginBrowser(accountName.Text, awsSession, SettingsInterface)
-	})
 
-	reconnectButton.Importance = 0
 	//reconnectButton.Importance = 1
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
@@ -131,15 +117,16 @@ func main() {
 			if stsError != nil {
 				popError(a, stsError)
 			} else {
-				accountName.SetText(accountSelectEntry.Text)
-				accountName.Alignment = fyne.TextAlignLeading
-				connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+				connectError := connectAccount(stsSettings, accountSelectEntry.Text, localWriter, selectedSessionTime)
 				if connectError != nil {
 					popError(a, connectError)
+					accountSelectEntry.SetText("")
+				} else {
+					accountName.SetText(accountSelectEntry.Text)
+					accountName.Alignment = fyne.TextAlignLeading
 				}
 				accountName.Alignment = fyne.TextAlignCenter
 			}
-
 		}
 	}
 	timerSelectEntry.OnChanged = func(input string) {
@@ -149,6 +136,27 @@ func main() {
 			selectedSessionTime = input
 		}
 	}
+	reconnectButton := widget.NewButton("Reconnect", func() {
+		stsSettings, stsError := getStSConfig(SettingsObject)
+		if stsError != nil {
+			popError(a, stsError)
+		} else if accountName.Text == placeholderAccountName {
+			//solves error when user tries to reconnect when he has not set account
+			popError(a, errors.New("cannot connect to unknown account. Please set account"))
+		} else {
+
+			println("test:" + accountName.Text)
+			connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+			if connectError != nil {
+				popError(a, connectError)
+			}
+		}
+	})
+	openBrowserButton := widget.NewButton("Open in Browser", func() {
+		idp.LoginBrowser(accountName.Text, awsSession, SettingsInterface)
+	})
+
+	reconnectButton.Importance = 0
 	//openBrowserButton
 	acclabelOpenBrowser := container.NewVSplit(accountName, openBrowserButton)
 	bottomComponents := container.NewVSplit(acclabelOpenBrowser, reconnectButton)

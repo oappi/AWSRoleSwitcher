@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oappi/awsroler/awsLogic"
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	"github.com/oappi/awsroleswitcher/awsLogic"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func UpdateList() {
