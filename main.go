@@ -175,7 +175,7 @@ func main() {
 func showLocalSettings(a fyne.App) {
 	win := a.NewWindow("Local Connect Settings")
 	MFASeedLabel := widget.NewLabel("MFA seed")
-	MFASeedText := widget.NewEntry()
+	MFASeedText := widget.NewPasswordEntry()
 	regionLabel := widget.NewLabel("Region")
 	regionListText := widget.NewEntry()
 	MFADeviceLabel := widget.NewLabel("MFA Device")
@@ -188,7 +188,7 @@ func showLocalSettings(a fyne.App) {
 	AccessKeyText := widget.NewPasswordEntry()
 	SecretAccessKeyLabel := widget.NewLabel("SecretAccessKey")
 	SecretAccessKeyText := widget.NewPasswordEntry()
-	aliasLabel := widget.NewLabel("MyAssumeAlias")
+	aliasLabel := widget.NewLabel("Alias")
 	aliasText := widget.NewEntry()
 	accountListLocation := creds.GetAWSFolderStripError() + "accountlist"
 
@@ -354,7 +354,7 @@ func showLocalMFA(a fyne.App, MFAsecret string) {
 func showKeyRotation(a fyne.App) {
 	win := a.NewWindow("Key Rotation")
 	infoLabel := widget.NewLabel("This feature creates new accesskeys," +
-		"\nsaves it to your storage medium (1password locally etc)" +
+		"\nsaves it to your storage medium (1password)" +
 		"\nand then removes old key. Note that this function only " +
 		"\nworks if you have 1 accesskey on your iam account as aws limits " +
 		"\nkeys to two")
