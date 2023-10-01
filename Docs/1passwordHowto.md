@@ -16,11 +16,11 @@ you should generate similar list of your accounts as example in
 #### Set up AWS login to 1Password
 if you already have set AWS login to 1password with mfa, you can skip this whole step.
 
-Add AWS login to your 1Password. Basically crete new login with your AWS username, password  and set webpage to be console.aws.amazon.com. This should change default login icon to AWS icon. 
+Add AWS login to your 1Password. Basically create new login with your AWS username, password  and set web-page to be console.aws.amazon.com. This should change default login icon to AWS icon. 
 
 Then go to process of adding MFA  [AWS MFA instruction video](https://pages.awscloud.com/how-to-enable-multi-factor-authentication-for-aws-account.html?nc1=f_ls)
 
-instead of reading QR code with your phone, use 1password to read QR code: From 1password desktop app you can achive this by pressing "add more" and picking one time password.
+instead of reading QR code with your phone, use 1password to read QR code: From 1password desktop app you can achieve this by pressing "add more" and picking one time password.
 This creates field with QR code image.![picture where to find add more](pics/qr.png) When you click qr-code image it should read QR images currently visible on your screen.
 
 #### Set up fields for AWSRoleSwitcher
@@ -42,7 +42,9 @@ Then set following as "password" so others wont be able to read it from your scr
 * access_key
 * secret_access_key
 and copy your aws accesskey and secret accesskey values to them.
-Now your setup should be completed. I would recomend removing accountlist file from local pc as well as accesskeys. They should be stored in 1password for now on.
+Now your setup should be completed. 
+
+I would recomend removing accountlist file from local pc as well as accesskeys. They should be stored in 1password for now on.
 
 
 ![picture where to find add more](pics/awsexample.png)
@@ -50,10 +52,10 @@ Now your setup should be completed. I would recomend removing accountlist file f
 
 ### Connecting with 1password
 
-Open add, select "connect" and "Connect via 1password". Note that you have to have 1password cliv2 installed as it will be used to issue commands towards 1password. You should have logged in with it at least once to provide MFA. If you don't have organizational account your domain is "my", otherwise domain is that has been assinged to your company. AWS login item name is name of entry in your 1password. Basically  1password Password is your password for 1password. These items allows app to issue command and request items content from 1password. 
+Open add, select "connect" and "Connect via 1password". Note that you have to have 1password cliv2 installed as it will be used to issue commands towards 1password. You should have logged in with it at least once to provide MFA. If you don't have organizational account your domain is "my", otherwise domain is that has been assigned to your company. AWS login item name is name of entry in your 1password. Basically  1password Password is your password for 1password. These items allows app to issue command and request items content from 1password. 
 
-1password is kinda cool with this app as you do not have to have configurations on your local device to be able to connect your AWS accounts and only required short time credentials are stored to credential file. This means that as long as you have required apps installed, you can switch PC:s really easily. In addition, accesskey rotation has safeguards of failed rotation as old AWS key wont be deleted until key has been successfully stored in 1password.
+Now you do not have to have configurations on your local device to be able to connect your AWS accounts and only required short time credentials are stored to credential file. This means that as long as you have required apps installed, you can switch PC:s easily. In addition, accesskey rotation is enabled by the app.
 
 
 ## Note worthy things
-Techically speaking, you dont need username & password anymore. So, if you want, you can disable console access if you only plan to use this app for logining to AWS console. In reality it is always nice to have failsafe if your accesskeys stop working, but in some organizations someone might complain if you have console access that is not used. Method which this app opens console access to browser is counted as CLI access.
+Technically speaking, you don't need username & password anymore. So, you can disable console access if you only plan to use this app for logging to AWS console. In reality it is always nice to have failsafe if your accesskeys stop working, but in some organizations someone might complain if you have console access that is not used. Method which this app opens console access to browser is counted as CLI access.
