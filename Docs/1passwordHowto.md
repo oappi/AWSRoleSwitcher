@@ -16,7 +16,7 @@ you should generate similar list of your accounts as example in
 #### Set up AWS login to 1Password
 if you already have set AWS login to 1password with mfa, you can skip this whole step.
 
-Add AWS login to your 1Password. Basically create new login with your AWS username, password  and set web-page to be console.aws.amazon.com. This should change default login icon to AWS icon. 
+Add AWS login to your 1Password. Basically create new login with your AWS username, password  and set website to be console.aws.amazon.com. This should change default login icon to AWS icon. 
 
 Then go to process of adding MFA  [AWS MFA instruction video](https://pages.awscloud.com/how-to-enable-multi-factor-authentication-for-aws-account.html?nc1=f_ls)
 
