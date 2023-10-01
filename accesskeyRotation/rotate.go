@@ -20,7 +20,7 @@ func RotateAccesskeys(settingsInterface interfaces.SettingsInterface, SettingsOb
 
 	oneAccesskeyFound, keyerr := hasExactlyOneAccesskey(iamSession)
 	if keyerr != nil {
-		return err, "", ""
+		return keyerr, "", ""
 	}
 	if !oneAccesskeyFound {
 		return errors.New("check that you have only one active access key"), "", ""
