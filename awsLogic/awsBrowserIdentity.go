@@ -6,13 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"runtime"
 	"strings"
 
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionInfo, SettingsInterface interfaces.SettingsInterface) error {
@@ -20,7 +19,7 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 	if errRegion != nil {
 		return errRegion
 	}
-	loginURLPrefix, destination := GenerateLoginURL(region, "")
+	loginURLPrefix, _ := GenerateLoginURL(region, "")
 	req, err := http.NewRequest("GET", loginURLPrefix, nil)
 	if err != nil {
 		return err
@@ -60,22 +59,20 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 	if !ok {
 		fmt.Errorf("Expected a response with SigninToken")
 	}
-
-	loginURL := fmt.Sprintf("%s?Action=login&Issuer=AWS-Roller&Destination=%s&SigninToken=%s",
-		loginURLPrefix, url.QueryEscape(destination), url.QueryEscape(signinToken))
+	fullbrowserURL := GetSignInURL("eu-west-1", signinToken)
 	switch runtime.GOOS {
 	case "linux":
-		err = exec.Command("xdg-open", loginURL).Start()
+		err = exec.Command("xdg-open", fullbrowserURL).Start()
 		if err != nil {
 			return err
 		}
 	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", loginURL).Start()
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", fullbrowserURL).Start()
 		if err != nil {
 			return err
 		}
 	case "darwin":
-		err = exec.Command("open", loginURL).Start()
+		err = exec.Command("open", fullbrowserURL).Start()
 		if err != nil {
 			return err
 		}
@@ -87,6 +84,11 @@ func LoginBrowser(selectedAccountInfo string, sessionInfo sharedStructs.SessionI
 	}
 
 	return nil
+}
+
+func GetSignInURL(region string, token string) string {
+	var fullbrowserURL = "https://us-east-1.signin.aws.amazon.com/oauth?Action=logout&redirect_uri=https%3A%2F%2F" + region + ".signin.aws.amazon.com%2Ffederation%3FAction%3Dlogin%26Destination%3Dhttps%253A%252F%252F" + region + ".console.aws.amazon.com%26SigninToken%3D" + token
+	return fullbrowserURL
 }
 
 // shout out to https://github.com/99designs/aws-vault/blob/master/cli/login.go

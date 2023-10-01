@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"strconv"
 	"sync"
@@ -14,12 +15,11 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-
-	keyrotation "github.com/oappi/awsroler/accesskeyRotation"
-	idp "github.com/oappi/awsroler/awsLogic"
-	creds "github.com/oappi/awsroler/credentialFileLogic"
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	keyrotation "github.com/oappi/awsroleswitcher/accesskeyRotation"
+	idp "github.com/oappi/awsroleswitcher/awsLogic"
+	creds "github.com/oappi/awsroleswitcher/credentialFileLogic"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 var awsSession sharedStructs.SessionInfo
@@ -32,6 +32,7 @@ var gOptionSelection *widget.SelectEntry
 var SettingsInterface interfaces.SettingsInterface
 var SettingsObject sharedStructs.FederationAccountSettingsObject
 var selectedSessionTime = "1 hour session"
+var placeholderAccountName = "not set"
 
 // sessionInfo
 /*
@@ -92,23 +93,11 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	accountName := widget.NewLabel("not set")
+	accountName := widget.NewLabel(placeholderAccountName)
 	accountName.TextStyle.Bold = true
 	accountName.TextStyle.Italic = true
 	accountName.Alignment = fyne.TextAlignLeading
-	reconnectButton := widget.NewButton("Reconnect", func() {
-		stsSettings, stsError := getStSConfig(SettingsObject)
-		if stsError != nil {
-			popError(a, stsError)
-		} else {
-			connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
-		}
-	})
-	openBrowserButton := widget.NewButton("Open in Browser", func() {
-		idp.LoginBrowser(accountName.Text, awsSession, SettingsInterface)
-	})
 
-	reconnectButton.Importance = 0
 	//reconnectButton.Importance = 1
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
@@ -128,12 +117,16 @@ func main() {
 			if stsError != nil {
 				popError(a, stsError)
 			} else {
-				accountName.SetText(accountSelectEntry.Text)
-				accountName.Alignment = fyne.TextAlignLeading
-				connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+				connectError := connectAccount(stsSettings, accountSelectEntry.Text, localWriter, selectedSessionTime)
+				if connectError != nil {
+					popError(a, connectError)
+					accountSelectEntry.SetText("")
+				} else {
+					accountName.SetText(accountSelectEntry.Text)
+					accountName.Alignment = fyne.TextAlignLeading
+				}
 				accountName.Alignment = fyne.TextAlignCenter
 			}
-
 		}
 	}
 	timerSelectEntry.OnChanged = func(input string) {
@@ -143,6 +136,27 @@ func main() {
 			selectedSessionTime = input
 		}
 	}
+	reconnectButton := widget.NewButton("Reconnect", func() {
+		stsSettings, stsError := getStSConfig(SettingsObject)
+		if stsError != nil {
+			popError(a, stsError)
+		} else if accountName.Text == placeholderAccountName {
+			//solves error when user tries to reconnect when he has not set account
+			popError(a, errors.New("cannot connect to unknown account. Please set account"))
+		} else {
+
+			println("test:" + accountName.Text)
+			connectError := connectAccount(stsSettings, accountName.Text, localWriter, selectedSessionTime)
+			if connectError != nil {
+				popError(a, connectError)
+			}
+		}
+	})
+	openBrowserButton := widget.NewButton("Open in Browser", func() {
+		idp.LoginBrowser(accountName.Text, awsSession, SettingsInterface)
+	})
+
+	reconnectButton.Importance = 0
 	//openBrowserButton
 	acclabelOpenBrowser := container.NewVSplit(accountName, openBrowserButton)
 	bottomComponents := container.NewVSplit(acclabelOpenBrowser, reconnectButton)
@@ -161,7 +175,7 @@ func main() {
 func showLocalSettings(a fyne.App) {
 	win := a.NewWindow("Local Connect Settings")
 	MFASeedLabel := widget.NewLabel("MFA seed")
-	MFASeedText := widget.NewEntry()
+	MFASeedText := widget.NewPasswordEntry()
 	regionLabel := widget.NewLabel("Region")
 	regionListText := widget.NewEntry()
 	MFADeviceLabel := widget.NewLabel("MFA Device")
@@ -174,7 +188,7 @@ func showLocalSettings(a fyne.App) {
 	AccessKeyText := widget.NewPasswordEntry()
 	SecretAccessKeyLabel := widget.NewLabel("SecretAccessKey")
 	SecretAccessKeyText := widget.NewPasswordEntry()
-	aliasLabel := widget.NewLabel("MyAssumeAlias")
+	aliasLabel := widget.NewLabel("Alias")
 	aliasText := widget.NewEntry()
 	accountListLocation := creds.GetAWSFolderStripError() + "accountlist"
 
@@ -233,35 +247,36 @@ func show1PSettings(a fyne.App) {
 	settingscontainer := container.NewGridWithColumns(2, labels, textFields)
 
 	applySettingsButton := widget.NewButton("Apply", func() {
-		var OPEntity = ""
-		var OPDomain = ""
-		// here we use saved value if user does not overwrite it
-		if entityNameText.Text == "" {
-			OPEntity = savedEntity
-		} else {
-			OPEntity = entityNameText.Text
-		}
-		if domainText.Text == "" {
-			OPDomain = savedDomain
-		} else {
-			OPDomain = domainText.Text
-		}
-		SettingsInterface = interfaces.Onepassword{Lock: lock, Uuid: OPEntity, OPDomain: OPDomain, Password: passwordText.Text}
+		finalDomain := replaceEmptyInputWithSavedValue(savedDomain, domainText.Text)
+		finalEntity := replaceEmptyInputWithSavedValue(savedEntity, entityNameText.Text)
+		SettingsInterface = interfaces.Onepassword{Lock: lock, Uuid: finalEntity, OPDomain: finalDomain, Password: passwordText.Text}
 		err := updateSettings(SettingsInterface)
 		if err != nil {
 			popError(a, err)
 		} else {
-			localWriter.Set1PasswordSettings(domainText.Text, entityNameText.Text)
+			if finalDomain != savedDomain || finalEntity != savedEntity {
+				localWriter.Set1PasswordSettings(finalDomain, finalEntity)
+			}
 			win.Close()
 		}
 	})
-
 	settingsplit := container.NewVSplit(settingscontainer, applySettingsButton)
 
 	settingsplit.Offset = 0.9
 	win.SetContent(settingsplit)
 	win.Show()
 	win.Close()
+}
+
+func replaceEmptyInputWithSavedValue(saved string, input string) string {
+	outputString := ""
+	if len(input) > 0 {
+		outputString = input
+	} else {
+		outputString = saved
+	}
+	return outputString
+
 }
 
 func showAuthor(a fyne.App) {
@@ -339,7 +354,7 @@ func showLocalMFA(a fyne.App, MFAsecret string) {
 func showKeyRotation(a fyne.App) {
 	win := a.NewWindow("Key Rotation")
 	infoLabel := widget.NewLabel("This feature creates new accesskeys," +
-		"\nsaves it to your storage medium (1password locally etc)" +
+		"\nsaves it to your storage medium (1password)" +
 		"\nand then removes old key. Note that this function only " +
 		"\nworks if you have 1 accesskey on your iam account as aws limits " +
 		"\nkeys to two")
@@ -348,7 +363,7 @@ func showKeyRotation(a fyne.App) {
 	infocontainer := container.NewGridWithColumns(1, textField)
 
 	applySettingsButton := widget.NewButton("Rotate", func() {
-		err, newAccesskey, newSecretAccesskey := keyrotation.RotateAccesskeys(SettingsInterface)
+		err, newAccesskey, newSecretAccesskey := keyrotation.RotateAccesskeys(SettingsInterface, SettingsObject)
 		if err != nil {
 			var errormessage = err.Error()
 			go errorPopUp(a, errormessage)

@@ -74,12 +74,12 @@ func SaveAccesskeys(signInCommand, entityName, accesskey, secretaccesskey string
 }
 
 func GetAlias(signInCommand string, entityName string) (string, error) {
-	var settingsFetchCommand = "op item get " + entityName + " --fields Alias"
+	var settingsFetchCommand = "op item get " + entityName + " --fields alias"
 	return OpCMDlogic(signInCommand + settingsFetchCommand)
 }
 
 func GetFetchAccountCommand(entityName string) string {
-	return "op item get " + entityName + " --fields Accounts"
+	return "op item get " + entityName + " --fields accounts"
 }
 
 func GetAccounts(signInCommand string, fetchAccountCommand string) ([]string, error) {
@@ -94,12 +94,12 @@ func GetAccounts(signInCommand string, fetchAccountCommand string) ([]string, er
 }
 
 func GetMFADevice(signInCommand string, entityName string) (string, error) {
-	var accountsFetchCommand = "op item get " + entityName + " --fields MFADevice"
+	var accountsFetchCommand = "op item get " + entityName + " --fields mfa_device"
 	return OpCMDlogic(signInCommand + accountsFetchCommand)
 }
 
 func GetRegion(signInCommand string, entityName string) (string, error) {
-	var accountsFetchCommand = "op item get " + entityName + " --fields Region"
+	var accountsFetchCommand = "op item get " + entityName + " --fields region"
 	return OpCMDlogic(signInCommand + accountsFetchCommand)
 }
 

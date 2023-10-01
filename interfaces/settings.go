@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	cred "github.com/oappi/awsroler/credentialFileLogic"
-	opLogic "github.com/oappi/awsroler/onePasswordLogic"
+	cred "github.com/oappi/awsroleswitcher/credentialFileLogic"
+	opLogic "github.com/oappi/awsroleswitcher/onePasswordLogic"
 )
 
 type SettingsInterface interface {
@@ -13,10 +13,11 @@ type SettingsInterface interface {
 	GetAlias() string
 	GetAccesskey() string
 	GetSecretAccessKey() string
-	GetRegion() (string, error) //primary region
+	GetRegion() (string, error)
 	GetAccounts() ([]string, error)
 	GetMFADevice() string
 	SetLongtermAccessKeys(string, string) error
+	AdvancedFeaturesEnabled() bool
 }
 
 type Onepassword struct {
@@ -123,4 +124,23 @@ func (op Onepassword) GetMFADevice() string {
 
 func (local LocalSettings) GetMFADevice() string {
 	return local.MFADevice
+}
+
+/*
+*
+Do we enable things like password rotation. With 1password we check that new key works before removing old one
+and if rotation fails for any reason 1password stores old values
+*/
+func (op Onepassword) AdvancedFeaturesEnabled() bool {
+	return true
+}
+
+/*
+*
+Do we enable things like password rotation. Since it is possible, although unlikely,
+to get in state where write corrupts localfile I prefer to disable this feature. As for 1password there
+is possibility to check historic versions where user can still use old key.
+*/
+func (local LocalSettings) AdvancedFeaturesEnabled() bool {
+	return false
 }

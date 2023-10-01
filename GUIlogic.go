@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oappi/awsroler/awsLogic"
-	"github.com/oappi/awsroler/interfaces"
-	"github.com/oappi/awsroler/sharedStructs"
+	"github.com/oappi/awsroleswitcher/awsLogic"
+	"github.com/oappi/awsroleswitcher/interfaces"
+	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
 func UpdateList() {
@@ -130,7 +130,7 @@ func FetchAndSaveAccountCredentials(stsConfig *sharedStructs.STSConfig, accountT
 }
 
 func getStSConfig(SettingsObject sharedStructs.FederationAccountSettingsObject) (*sharedStructs.STSConfig, error) {
-	stsConfig, stsError := awsLogic.InitializeSTSConfig(SettingsObject)
+	stsConfig, stsError := awsLogic.CreateSTSSession(SettingsObject)
 	if stsError != nil {
 		return nil, stsError
 	} else {
@@ -146,7 +146,10 @@ func connectAccount(STSConfig *sharedStructs.STSConfig, selectedAccountInfo stri
 	var splittedaccountinfo = strings.Split(selectedAccountInfo, "|")
 	var accountToConnect = splittedaccountinfo[1]
 	var accountRole = splittedaccountinfo[2]
-	FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, gregion, sessionTime)
+	fetchError := FetchAndSaveAccountCredentials(STSConfig, accountToConnect, accountRole, gregion, sessionTime)
+	if fetchError != nil {
+		return fetchError
+	}
 	writer.UpdateShortTermKeys(awsSession.Accesskey, awsSession.SecretAccessKey, awsSession.Token)
 	return nil
 }
