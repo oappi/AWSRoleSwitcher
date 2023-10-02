@@ -15,7 +15,7 @@ type SettingsInterface interface {
 	GetSecretAccessKey() string
 	GetRegion() (string, error)
 	GetAccounts() ([]string, error)
-	GetMFADevice() string
+	GetMFADevice() (string, error)
 	SetLongtermAccessKeys(string, string) error
 	AdvancedFeaturesEnabled() bool
 }
@@ -116,14 +116,14 @@ func (local LocalSettings) GetAccounts() ([]string, error) {
 
 }
 
-func (op Onepassword) GetMFADevice() string {
+func (op Onepassword) GetMFADevice() (string, error) {
 	signincmd := opLogic.SigninCommand(op.Password, op.OPDomain)
-	output, _ := opLogic.GetMFADevice(signincmd, op.Uuid)
-	return output
+	output, error := opLogic.GetMFADevice(signincmd, op.Uuid)
+	return output, error
 }
 
-func (local LocalSettings) GetMFADevice() string {
-	return local.MFADevice
+func (local LocalSettings) GetMFADevice() (string, error) {
+	return local.MFADevice, nil
 }
 
 /*

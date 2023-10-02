@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	iam "github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/oappi/awsroleswitcher/interfaces"
 	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
@@ -24,13 +25,44 @@ func CreateSTSSession(settingsFile sharedStructs.FederationAccountSettingsObject
 	}, nil
 }
 
-func CreateIAMSession(settingsFile sharedStructs.FederationAccountSettingsObject) (*iam.IAM, error) {
-
+/*
+CreateIAMSession creates iam client with MFA enabled
+*/
+func CreateIAMSession(settingsFile sharedStructs.FederationAccountSettingsObject, SettingsInterface interfaces.SettingsInterface) (*iam.IAM, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(settingsFile.Region),
 		Credentials: credentials.NewStaticCredentials(settingsFile.AccessKey, settingsFile.SecretAccessKey, ""),
 	})
-	svc := iam.New(sess)
+	_sts := sts.New(sess)
+
+	MFASerial, deviceError := SettingsInterface.GetMFADevice()
+	if deviceError != nil {
+		return nil, deviceError
+	}
+
+	mfa, mfaError := SettingsInterface.GetMFA() //required for password rotation on accounts that use aws recomended policy
+	if mfaError != nil {
+		return nil, mfaError
+	}
+
+	resSessionToken, stsErr := _sts.GetSessionToken(&sts.GetSessionTokenInput{
+		TokenCode:    &mfa,
+		SerialNumber: &MFASerial,
+	})
+	if stsErr != nil {
+		return nil, stsErr
+	}
+
+	MFASession, errMfa := session.NewSession(&aws.Config{
+		Region:      aws.String(settingsFile.Region),
+		Credentials: credentials.NewStaticCredentials(*resSessionToken.Credentials.AccessKeyId, *resSessionToken.Credentials.SecretAccessKey, *resSessionToken.Credentials.SessionToken),
+	})
+
+	if errMfa != nil {
+		return nil, errMfa
+	}
+
+	svc := iam.New(MFASession)
 	if err != nil {
 		return nil, err
 	}
