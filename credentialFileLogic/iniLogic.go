@@ -74,7 +74,6 @@ func UpdateShortTermAWSKeys(accesskey, secretaccesskey, token, AWSFolderlocation
 	cfg.Section("default").Key("aws_access_key_id").SetValue(accesskey)
 	cfg.Section("default").Key("aws_secret_access_key").SetValue(secretaccesskey)
 	cfg.Section("default").Key("aws_session_token").SetValue(token)
-	println("Note, Saving to AWS credentials file")
 	return saveWithReducedPriviliges(AWSFolderlocation+"credentials", cfg)
 }
 
