@@ -89,7 +89,10 @@ func fetchFederationCredentialsAndSettings(settings interfaces.SettingsInterface
 	accessKey := settings.GetAccesskey()
 	secretAccessKey := settings.GetSecretAccessKey()
 	alias := settings.GetAlias()
-	mfaDevice := settings.GetMFADevice()
+	mfaDevice, deviceError := settings.GetMFADevice()
+	if deviceError != nil {
+		return emptySettings, deviceError
+	}
 	region, regionError := settings.GetRegion()
 	if regionError != nil {
 		return emptySettings, regionError
