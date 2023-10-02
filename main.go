@@ -22,6 +22,7 @@ import (
 	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
+var version = "1.0.0"
 var awsSession sharedStructs.SessionInfo
 var lock = &sync.Mutex{}
 
@@ -282,6 +283,7 @@ func replaceEmptyInputWithSavedValue(saved string, input string) string {
 func showAuthor(a fyne.App) {
 	win := a.NewWindow("Info")
 	win.SetContent(widget.NewLabel("\n Copyright 2021 Ossi Ala-Peijari (MIT lincese) \n\n\n" +
+		"Version: " + version + "\n\n\n" +
 		"Permission is hereby granted, free of charge, to any person obtaining a copy \n of this software and associated documentation files  (the \"Software\"),\n to deal in the Software without restriction, including without\n limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,\n and/or sell copies of the Software, and to permit persons to whom \n the Software is furnished to do so, subject to the following conditions: \n\n\n" +
 
 		"The above copyright notice and this permission notice shall be included in all\n copies or substantial portions of the Software. \n\n\n" +
