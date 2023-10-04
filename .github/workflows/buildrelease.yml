@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Go & Fyne (GUI framework) dependecies
-        run:  sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
+        run:  sudo apt-get update && sudo apt-get install -y golang gcc libgl1-mesa-dev xorg-dev
       - name: Build
         run: go build .
       - name: Rename For release
