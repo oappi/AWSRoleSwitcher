@@ -1,15 +1,9 @@
 name: Main
 
 on:
-  workflow_dispatch:
-    inputs:
-      Version:
-        description: 'version to be released'
-        required: true
-
-#  push:
-#    tags:
-#      - "v*.*.*"
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   cache-build-linux:
@@ -17,10 +11,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set tag env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Install Go & Fyne (GUI framework) dependecies
-        run:  sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
+        run:  sudo apt-get update && sudo apt-get install -y golang gcc libgl1-mesa-dev xorg-dev
       - name: Build
-        run: go build .
+        run: go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
       - name: Rename For release
         run: cp awsroleswitcher  awsroleswitcherlinux
       - name: show files
@@ -30,15 +26,20 @@ jobs:
         with:
           path: ./awsroleswitcherlinux
           key: ${{ github.sha }}-linux
+
   cache-build-mac:
     runs-on: macos-12
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
       - name: Build
-        run: echo ${{ github.sha }} mac > awsroleswitchermac
-      - name: Test
-        run: cat awsroleswitchermac
+        run: go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
+      - name: Rename For release
+        run: cp awsroleswitcher  awsroleswitchermac
       - uses: actions/cache@v3
         id: restore-build
         with:
@@ -60,4 +61,13 @@ jobs:
         with:
           path: ./awsroleswitchermac
           key: ${{ github.sha }}-mac
-      - run: ls
+      - run: ls -l
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            awsroleswitchermac
+            awsroleswitcherlinux
+
+
