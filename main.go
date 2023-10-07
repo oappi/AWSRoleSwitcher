@@ -22,7 +22,7 @@ import (
 	"github.com/oappi/awsroleswitcher/sharedStructs"
 )
 
-var version = "1.0.0"
+var version = "self-compiled"
 var awsSession sharedStructs.SessionInfo
 var lock = &sync.Mutex{}
 
@@ -34,14 +34,6 @@ var SettingsInterface interfaces.SettingsInterface
 var SettingsObject sharedStructs.FederationAccountSettingsObject
 var selectedSessionTime = "1 hour session"
 var placeholderAccountName = "not set"
-
-// sessionInfo
-/*
-func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
-	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
-		focused.TypedShortcut(s)
-	}
-}*/
 
 func main() {
 	a := app.NewWithID("io.fyne.oappi.AWSRoleSwitcher")
@@ -290,7 +282,7 @@ func showAuthor(a fyne.App) {
 
 		"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, \n INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, \n FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT \n HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, \n WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, \n OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS \n IN THE SOFTWARE. \n\n\n" +
 		"Additional licenses: https://github.com/fyne-io/fyne/blob/master/LICENSE"))
-	win.Resize(fyne.NewSize(200, 200))
+	win.Resize(fyne.NewSize(350, 200))
 	win.Show()
 	win.Close()
 }
