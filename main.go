@@ -187,10 +187,15 @@ func showLocalSettings(a fyne.App) {
 
 	mfaDevice, mfaSeed, accesskey, secretaccesskey, alias, region, fetcherror := localWriter.GetLocalSettings()
 	if fetcherror != nil {
+		customOpenError := errors.New("Could not read old settings. This is normal first time\n Be aware that this option will save MFA seed, accesskey and \n secret accesskey to plaintext file in .aws directory.\n\n !!!You have been warned!!!")
+		popError(a, customOpenError)
+
+	} else {
 		MFADeviceText.SetPlaceHolder(mfaDevice)
 		MFASeedText.SetPlaceHolder(mfaSeed)
 		AccessKeyText.SetPlaceHolder(accesskey)
 		SecretAccessKeyText.SetPlaceHolder(secretaccesskey)
+		regionListText.SetPlaceHolder(region)
 		aliasText.SetPlaceHolder(alias)
 	}
 	labels := container.NewGridWithColumns(1, MFASeedLabel, MFACodeButtonLabel, MFADeviceLabel, regionLabel, AccessKeyLabel, SecretAccessKeyLabel, aliasLabel)

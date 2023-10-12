@@ -72,7 +72,7 @@ func filteredCustomListForSelect(filter *string, list []string) (resultList []st
 }
 
 func OverRideSavedIfUserGivesInput(userInput string, savedInput string) string {
-	if userInput != "" {
+	if len(userInput) > 0 {
 		return userInput
 	} else {
 		return savedInput
