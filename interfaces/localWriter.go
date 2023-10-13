@@ -36,5 +36,5 @@ func (ini IniLogic) GetLocalSettings() (string, string, string, string, string, 
 }
 
 func (ini IniLogic) SetLocalSettings(MFADevice, MFASeed, access_key, secret_access_key, alias, region string) {
-	creds.SetLocalSettings(ini.AWSFolderLocation, MFADevice, MFASeed, access_key, secret_access_key, alias)
+	creds.SetLocalSettings(ini.AWSFolderLocation, MFADevice, MFASeed, access_key, secret_access_key, alias, region)
 }

@@ -13,9 +13,9 @@ func GetLocalSettings(AWSFolderlocation string) (string, string, string, string,
 	}
 	mfaDevice := cfg.Section("localSettings").Key("MFADevice").String()
 	mfaSeed := cfg.Section("localSettings").Key("MFASeed").String()
-	accesskey := cfg.Section("localSettings").Key("access_key").String()
-	secretaccesskey := cfg.Section("localSettings").Key("secret_access_key").String()
-	alias := cfg.Section("localSettings").Key("alias").String()
+	accesskey := cfg.Section("localSettings").Key("Access_key").String()
+	secretaccesskey := cfg.Section("localSettings").Key("Secret_access_key").String()
+	alias := cfg.Section("localSettings").Key("Alias").String()
 	region := cfg.Section("localSettings").Key("Region").String()
 
 	return mfaDevice, mfaSeed, accesskey, secretaccesskey, alias, region, nil
@@ -33,16 +33,17 @@ func saveWithReducedPriviliges(fullFilePath string, cfg *ini.File) error {
 	return nil
 }
 
-func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_access_key, alias string) error {
+func SetLocalSettings(AWSFolderlocation, MFADevice, MFASeed, access_key, secret_access_key, alias, region string) error {
 	cfg, err := ini.Load(AWSFolderlocation + "awsroleswitcher")
 	if err != nil {
 		cfg = ini.Empty()
 	}
+	cfg.Section("localSettings").Key("Region").SetValue(region)
 	cfg.Section("localSettings").Key("MFADevice").SetValue(MFADevice)
 	cfg.Section("localSettings").Key("MFASeed").SetValue(MFASeed)
-	cfg.Section("localSettings").Key("access_key").SetValue(access_key)
-	cfg.Section("localSettings").Key("secret_access_key").SetValue(secret_access_key)
-	cfg.Section("localSettings").Key("alias").SetValue(alias)
+	cfg.Section("localSettings").Key("Access_key").SetValue(access_key)
+	cfg.Section("localSettings").Key("Secret_access_key").SetValue(secret_access_key)
+	cfg.Section("localSettings").Key("Alias").SetValue(alias)
 	return saveWithReducedPriviliges(AWSFolderlocation+"awsroleswitcher", cfg)
 }
 
