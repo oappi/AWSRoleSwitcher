@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v3
         id: restore-build
         with:
-          path: ./awsroleswitcherlinux
+          path: ./awsroleswitcherlinuxX64
           key: ${{ github.sha }}-linux
 
   cache-build-mac:
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/cache@v3
         id: restore-build
         with:
-          path: ./awsroleswitchermac
+          path: ./awsroleswitchermacARM64
           key: ${{ github.sha }}-mac
   cache-use-build:
     name: Retrive builds from cache and release
