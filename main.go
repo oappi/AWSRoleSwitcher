@@ -4,10 +4,13 @@ package main
 import (
 	"context"
 	"errors"
+
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -192,9 +195,9 @@ func showLocalSettings(a fyne.App) {
 
 	} else {
 		MFADeviceText.SetPlaceHolder(mfaDevice)
-		MFASeedText.SetPlaceHolder(mfaSeed)
-		AccessKeyText.SetPlaceHolder(accesskey)
-		SecretAccessKeyText.SetPlaceHolder(secretaccesskey)
+		MFASeedText.SetPlaceHolder(hideSecret(mfaSeed))
+		AccessKeyText.SetPlaceHolder(hideSecret(accesskey))
+		SecretAccessKeyText.SetPlaceHolder(hideSecret(secretaccesskey))
 		regionListText.SetPlaceHolder(region)
 		aliasText.SetPlaceHolder(alias)
 	}
@@ -226,6 +229,10 @@ func showLocalSettings(a fyne.App) {
 	win.SetContent(settingsplit)
 	win.Show()
 	win.Close()
+}
+
+func hideSecret(password string) string {
+	return strings.Repeat("*", utf8.RuneCountInString(password))
 }
 
 func show1PSettings(a fyne.App) {
