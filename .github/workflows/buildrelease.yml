@@ -16,7 +16,10 @@ jobs:
       - name: Install Go & Fyne (GUI framework) dependecies
         run:  sudo apt-get update && sudo apt-get install -y golang gcc libgl1-mesa-dev xorg-dev
       - name: Build
-        run: GOOS=linux GOARCH=amd64 go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
+        run: go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
+        env:
+          GOOS: linux
+          GOARCH: amd64     
       - name: Rename For release
         run: cp awsroleswitcher  awsroleswitcherlinuxX64
       - name: show files
@@ -37,7 +40,11 @@ jobs:
         with:
           go-version: '1.21.x'
       - name: Build
-        run: GOOS=darwin GOARCH=arm64 go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
+        run: go build --ldflags "-X 'main.version=${{ env.RELEASE_VERSION }}'" .
+        env:
+          CGO_ENABLED: 1
+          GOOS: darwin
+          GOARCH: arm64
       - name: Rename For release
         run: cp awsroleswitcher  awsroleswitchermacARM64
       - uses: actions/cache@v3
