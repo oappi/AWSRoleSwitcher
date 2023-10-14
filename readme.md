@@ -19,17 +19,21 @@ App expects
 * Operations to rotate access keys, this includes listing users keys as we want to be sure we can create accesskey before starting operation. 
 
 ## Requirments for this app
-* 1Password CLI tool (and user has to have logged in via 1password cli at least once to set up 1password MFA)
-* 1Password desktop app (this is also handy for making CLI ask 1password password again after defined period of time)
-* Golang **
 * AWS CLI
-* Fyne components https://developer.fyne.io/started/ (UI framework used in this project) Note that it is recommended to restart after installig these packages, or at least for me they only started working after restart. ***
-* Linux/Mac****
+* 1Password CLI V2  **
+* 1Password desktop app **
+* Golang ***
+* Fyne components https://developer.fyne.io/started/ (UI framework used in this project) Note that it is recommended to restart after installing these packages, or at least for me they only started working after restart. ****
+* Linux/Mac*****
 
+***************
 
-** Is not required if you download binary file from release page
-*** On Mac only required if you build your self, on Linux you might need opengl packages mentioned in documentation
-**** Actively only tested with (Fedora & Mint) Linux. Since I don't own a mac, I can't really say for sure if it works, but I would imagine it works similarly to linux version as tool uses 1Password cli via bash  which should work same way in Mac and Linux. Fyne it self works on Windows, Linux, Mac, but bash commands used to call 1password cli have not been translated to Powershell commands which is requirement for it to work on windows. 
+* ** User has to have logged in via 1password cli at least once to set up 1password MFA. One can also set up CLI integration to desktop app from developer settings, which removes need to interact with command line.
+* *** Technically you don't need it, but it will give you better user experience and additional features. Features like setting expiration time for authentication. For example: it wont give access after 15 minutes with out re-entering 1password password and as mentioned earlier no need to interact with commandline.
+* **** Is not required if you download binary file from release page
+* ***** On Mac only required if you build your self, on Linux you might need gl packages mentioned in documentation
+* ****** Actively only tested with (Fedora & Mint) Linux. I don't have constant access to Mac, but it has been tested to run with 1password integration. Fyne it self works on Windows, Linux, Mac, but bash commands used to call 1password cli have not been translated to Powershell commands which is requirement for it to work on windows.
+
 
 
 ## Installation
@@ -40,7 +44,8 @@ Just download release file for your operating system from github. There should b
 chmod +x awsroleswitcher
 ```
 Most operating systems support this functionality from right clicking file, but steps are different between desktop environments and won't be defined here
-
+#### Mac only
+Since this project does not have developer ID for mac, in addition to previous step with chmod +x, when user uses app first time he is required to approve usage through security and privacy settings. After first launch attempt there should be notification in security and privacy settings which user has to approve before being able to launch this app.
 
 ### Using golang
 We do expect that you have already installed required packages & tools and you are running supported OS. These are mentioned in "Requirements for this app" chapter 
