@@ -21,17 +21,17 @@ App expects
 ## Requirments for this app
 * AWS CLI
 * 1Password CLI V2  **
-* 1Password desktop app **
-* Golang ***
-* Fyne components https://developer.fyne.io/started/ (UI framework used in this project) Note that it is recommended to restart after installing these packages, or at least for me they only started working after restart. ****
-* Linux/Mac*****
+* 1Password desktop app ***
+* Golang ****
+* Fyne components https://developer.fyne.io/started/ (UI framework used in this project). *****
+* Linux/Mac******
 
 ***************
 
 * ** User has to have logged in via 1password cli at least once to set up 1password MFA. One can also set up CLI integration to desktop app from developer settings, which removes need to interact with command line.
 * *** Technically you don't need it, but it will give you better user experience and additional features. Features like setting expiration time for authentication. For example: it wont give access after 15 minutes with out re-entering 1password password and as mentioned earlier no need to interact with commandline.
 * **** Is not required if you download binary file from release page
-* ***** On Mac only required if you build your self, on Linux you might need gl packages mentioned in documentation
+* ***** On Mac only required if you build your self, on Linux you might need gl packages mentioned in documentation. Note that it is recommended to restart after installing these packages, or at least for me they only started working after restart.
 * ****** Actively only tested with (Fedora & Mint) Linux. I don't have constant access to Mac, but it has been tested to run with 1password integration. Fyne it self works on Windows, Linux, Mac, but bash commands used to call 1password cli have not been translated to Powershell commands which is requirement for it to work on windows.
 
 
