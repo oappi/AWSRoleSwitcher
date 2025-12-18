@@ -1,3 +1,6 @@
+# Archived
+This repo is being archived because I personally don't have enough time to focus on both Identity center (SSO) and this version. Final nail was that there seems to be some change on 1password api that broke integration and I personally don't have time to follow their changes and I am mostly using the SSO center anyway. If someone wants to take over the project, I dont mind.
+
 # AWSRoleSwitcher
 
 ![Image of AWSRoleSwitcher](Docs/pics/apppic.png)
